@@ -72,7 +72,7 @@ run started at, the engine version, what enforcement actually ran
 (`hermeticity`), and — for containerized runs — the image. Written by
 the run, read by `lc status` and `lc materialize --check`; kept in
 plain git so a clone can classify a whole project without fetching any
-data.
+results, once its declared inputs are fetched.
 
 ## definition_version
 

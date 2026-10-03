@@ -62,7 +62,7 @@ A real project starts from a dataset; ours will generate a small one —
 200 points on a line, with a few outliers thrown far off it:
 
 ```bash
-python3 - <<'EOF'
+uv run python - <<'EOF'
 import random
 random.seed(0)
 rows = ["x,y"]
@@ -86,7 +86,7 @@ your tree, and the repository stays light.
 `astra.yaml` was scaffolded as an empty analysis. Fill it in with ours:
 
 ```yaml
-version: "0.0.13"   # ASTRA schema version — keep what the scaffold wrote
+version: "0.0.14"   # ASTRA schema version — keep what the scaffold wrote
 name: "line_fit"
 description: |
   Fit a straight line to a small synthetic dataset and sweep one
@@ -163,11 +163,10 @@ materialize to `results/<universe>/<output_id>.<format>`.
 Check the spec is well-formed:
 
 ```bash
-astra validate astra.yaml
+lc materialize --check
 ```
 
-(`astra` is the spec-side CLI; it ships with `astra-tools`, a dependency
-of lightcone-cli.)
+As well as validating the spec, it lists what a build would make.
 
 ## 4. Write the scripts
 
@@ -251,18 +250,18 @@ the record of what your results were computed with.
 
 Launch the built-in local offer; no compute configuration is needed. It provides
 all usable CPUs and RAM, and stops once it has had no work for 30 minutes. Keep
-the returned ID in `CLUSTER` for this walkthrough. Configured remote offers coexist with that default. A catalog can
+the returned name in `CLUSTER` for this walkthrough. Configured remote offers coexist with that default. A catalog can
 override the local budget, disable local compute, or provide explicit local offers;
 see [Running on a Cluster](cluster.md). NERSC login nodes automatically refuse local
 compute; use a compute node in an interactive allocation or a configured Slurm offer.
 
 ```bash
-CLUSTER=$(lc compute launch --wait --json | python -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+CLUSTER=$(lc compute launch --wait)
 ```
 
-Execution always requires this cluster ID. `lc materialize --check` can inspect
+Execution always requires a cluster name or ID. `lc materialize --check` can inspect
 what needs rebuilding without allocating compute. If the allocation expires
-during the walkthrough, launch another one and replace `CLUSTER` with its new ID.
+during the walkthrough, run the launch line again.
 
 Commit, then build:
 
@@ -393,8 +392,9 @@ repository you already have.
 
 Clone this repository on a fresh machine, run `lc init` (it rebuilds
 the two pieces of local state git doesn't carry — the `.venv` and the
-annex), then `lc materialize --check`: it reports up to date without fetching a
-single data byte, because the provenance travels in git. The bytes
+annex), then fetch the declared inputs with `git annex get data/` and run
+`lc materialize --check`: it reports up to date without fetching a single
+result byte, because the provenance travels in git. The results
 themselves follow with `git annex get` whenever you actually need them.
 
 ## Where to next
